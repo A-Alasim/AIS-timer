@@ -22,8 +22,8 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
-      align-items: center; /* Center elements vertically */
-      justify-content: center; /* Center elements horizontally */
+      align-items: center;
+      justify-content: center;
     }
     h1 {
       font-size: 2.5em;
@@ -33,20 +33,13 @@
       font-size: 2em;
       margin: 10px 0;
     }
-    #endMessage {
-      font-size: 2em;
-      margin: 10px 0;
-      color: #FF5733; /* Color for end message */
-      padding: 10px 0;
-      display: inline-block;
-      width: auto;
-    }
     #sizeChangeMessage {
       font-size: 1.5em;
       margin: 10px 0;
       color: #28a745; /* Green color for size change message */
-      display: none;
       font-weight: bold;
+      display: none;
+      opacity: 1;
       transition: opacity 0.5s ease-out;
     }
 
@@ -87,7 +80,6 @@
     <div id="sizeChangeMessage"></div> <!-- Message for font size change -->
     <div id="session">Loading...</div>
     <div id="countdown">Please wait...</div>
-    <div id="endMessage"></div>
 
     <!-- Size buttons -->
     <button id="increaseBtn" class="size-button">Increase Font Size</button>
@@ -130,12 +122,10 @@
       const session = sessionTimes.find(s => now >= s.start && now < s.end);
       const sessionEl = document.getElementById("session");
       const countdownEl = document.getElementById("countdown");
-      const endMessageEl = document.getElementById("endMessage");
 
       if (!session) {
         sessionEl.textContent = "School's Out!";
-        countdownEl.textContent = "Have a great day!";
-        endMessageEl.textContent = "School's Out! Have a great day!";
+        countdownEl.textContent = ""; // Removed "Have a great day!" message
         return;
       }
 
@@ -146,14 +136,12 @@
 
       sessionEl.textContent = session.name;
       countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} remaining`;
-      endMessageEl.textContent = ""; // Clear end message when school is in session
     }
 
     // Handle font size adjustment
     function adjustFontSize(increase) {
       const sessionEl = document.getElementById("session");
       const countdownEl = document.getElementById("countdown");
-      const endMessageEl = document.getElementById("endMessage");
       const sizeChangeMessageEl = document.getElementById("sizeChangeMessage");
 
       const increaseBtn = document.getElementById("increaseBtn");
@@ -162,28 +150,29 @@
       if (increase) {
         currentFontSize += 0.1;
         sizeChangeMessageEl.textContent = "Font size increased!";
+        sizeChangeMessageEl.style.display = 'block'; // Ensure the message is visible
         increaseBtn.classList.add("active");
         decreaseBtn.classList.remove("active");
       } else {
         currentFontSize = Math.max(1, currentFontSize - 0.1); // Prevent shrinking too small
         sizeChangeMessageEl.textContent = "Font size decreased!";
+        sizeChangeMessageEl.style.display = 'block'; // Ensure the message is visible
         decreaseBtn.classList.add("active");
         increaseBtn.classList.remove("active");
       }
 
       sessionEl.style.fontSize = `${currentFontSize}em`;
       countdownEl.style.fontSize = `${currentFontSize}em`;
-      endMessageEl.style.fontSize = `${currentFontSize}em`; // Adjust end message size too
 
       // Show the font size change message
-      sizeChangeMessageEl.style.display = 'block';
       setTimeout(() => {
         sizeChangeMessageEl.style.opacity = 0;
-      }, 100); // Fade out message quickly
+      }, 1000); // Fade out message after 1 second
+
       setTimeout(() => {
         sizeChangeMessageEl.style.display = 'none';
         sizeChangeMessageEl.style.opacity = 1; // Reset opacity for the next message
-      }, 600); // Hide the message after it fades out
+      }, 1500); // Hide the message after it fades out
     }
 
     // Reset font size to original
@@ -191,11 +180,9 @@
       currentFontSize = originalFontSize; // Reset to the original size
       const sessionEl = document.getElementById("session");
       const countdownEl = document.getElementById("countdown");
-      const endMessageEl = document.getElementById("endMessage");
 
       sessionEl.style.fontSize = `${currentFontSize}em`;
       countdownEl.style.fontSize = `${currentFontSize}em`;
-      endMessageEl.style.fontSize = `${currentFontSize}em`; // Reset end message size too
     }
 
     // Event listeners for the buttons

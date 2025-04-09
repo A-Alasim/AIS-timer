@@ -25,13 +25,14 @@
       font-size: 2.5em;
       margin-bottom: 20px;
     }
-    #session {
+    #session, #countdown {
       font-size: 2em;
       margin: 10px 0;
     }
-    #countdown {
-      font-size: 1.5em;
-      color: #333;
+    #endMessage {
+      font-size: 2em;
+      margin: 10px 0;
+      color: #FF5733; /* Color for end message */
     }
   </style>
 </head>
@@ -40,6 +41,7 @@
     <h1>School Countdown Timer</h1>
     <div id="session">Loading...</div>
     <div id="countdown">Please wait...</div>
+    <div id="endMessage"></div> <!-- Added div for end message -->
   </div>
 
   <script>
@@ -78,10 +80,12 @@
       const session = sessionTimes.find(s => now >= s.start && now < s.end);
       const sessionEl = document.getElementById("session");
       const countdownEl = document.getElementById("countdown");
+      const endMessageEl = document.getElementById("endMessage");
 
       if (!session) {
         sessionEl.textContent = "School's Out!";
         countdownEl.textContent = "Have a great day!";
+        endMessageEl.textContent = "School's Out! Have a great day!";
         return;
       }
 
@@ -92,12 +96,14 @@
 
       sessionEl.textContent = session.name;
       countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} remaining`;
+      endMessageEl.textContent = ""; // Clear end message when school is in session
     }
 
     // Handle font size adjustment
     function adjustFontSize(increase) {
       const sessionEl = document.getElementById("session");
       const countdownEl = document.getElementById("countdown");
+      const endMessageEl = document.getElementById("endMessage");
 
       if (increase) {
         currentFontSize += 0.1;
@@ -107,6 +113,7 @@
 
       sessionEl.style.fontSize = `${currentFontSize}em`;
       countdownEl.style.fontSize = `${currentFontSize}em`;
+      endMessageEl.style.fontSize = `${currentFontSize}em`; // Adjust end message size too
     }
 
     // Reset font size to original
@@ -114,9 +121,11 @@
       currentFontSize = originalFontSize; // Reset to the original size
       const sessionEl = document.getElementById("session");
       const countdownEl = document.getElementById("countdown");
+      const endMessageEl = document.getElementById("endMessage");
 
       sessionEl.style.fontSize = `${currentFontSize}em`;
       countdownEl.style.fontSize = `${currentFontSize}em`;
+      endMessageEl.style.fontSize = `${currentFontSize}em`; // Reset end message size too
     }
 
     // Event listener for keyboard input (up/down arrow or W/S)

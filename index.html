@@ -7,9 +7,19 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
+      background: linear-gradient(to bottom, #a2c2e7, #f9f9f9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
       text-align: center;
-      padding: 50px;
+    }
+    div {
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     h1 {
       font-size: 2.5em;
@@ -26,9 +36,11 @@
   </style>
 </head>
 <body>
-  <h1>School Countdown Timer</h1>
-  <div id="session">Loading...</div>
-  <div id="countdown">Please wait...</div>
+  <div>
+    <h1>School Countdown Timer</h1>
+    <div id="session">Loading...</div>
+    <div id="countdown">Please wait...</div>
+  </div>
 
   <script>
     const schedule = [
@@ -58,6 +70,9 @@
       currentTime = new Date(end);
     });
 
+    let currentFontSize = 2; // Starting font size multiplier (2em)
+    const originalFontSize = currentFontSize; // Store the original size
+
     function updateCountdown() {
       const now = new Date();
       const session = sessionTimes.find(s => now >= s.start && now < s.end);
@@ -78,6 +93,63 @@
       sessionEl.textContent = session.name;
       countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} remaining`;
     }
+
+    // Handle font size adjustment
+    function adjustFontSize(increase) {
+      const sessionEl = document.getElementById("session");
+      const countdownEl = document.getElementById("countdown");
+
+      if (increase) {
+        currentFontSize += 0.1;
+      } else {
+        currentFontSize = Math.max(1, currentFontSize - 0.1); // Prevent shrinking too small
+      }
+
+      sessionEl.style.fontSize = `${currentFontSize}em`;
+      countdownEl.style.fontSize = `${currentFontSize}em`;
+    }
+
+    // Reset font size to original
+    function resetFontSize() {
+      currentFontSize = originalFontSize; // Reset to the original size
+      const sessionEl = document.getElementById("session");
+      const countdownEl = document.getElementById("countdown");
+
+      sessionEl.style.fontSize = `${currentFontSize}em`;
+      countdownEl.style.fontSize = `${currentFontSize}em`;
+    }
+
+    // Event listener for keyboard input (up/down arrow or W/S)
+    window.addEventListener('keydown', function(event) {
+      if (event.key === 'ArrowUp' || event.key === 'w') {
+        adjustFontSize(true);
+      } else if (event.key === 'ArrowDown' || event.key === 's') {
+        adjustFontSize(false);
+      } else if (event.key === ' ' || event.key === 'Enter') {
+        resetFontSize(); // Reset font size when Spacebar or Enter is pressed
+      }
+    });
+
+    // Event listener for screen clicks (top, center, or bottom of the screen)
+    window.addEventListener('click', function(event) {
+      const screenHeight = window.innerHeight;
+      const screenWidth = window.innerWidth;
+      const clickX = event.clientX;
+      const clickY = event.clientY;
+
+      // Center area clicked (reset font size)
+      if (clickX > screenWidth / 3 && clickX < 2 * screenWidth / 3 && clickY > screenHeight / 3 && clickY < 2 * screenHeight / 3) {
+        resetFontSize();
+      }
+      // Top area clicked (increase font size)
+      else if (clickY < screenHeight / 2) {
+        adjustFontSize(true);
+      }
+      // Bottom area clicked (decrease font size)
+      else {
+        adjustFontSize(false);
+      }
+    });
 
     setInterval(updateCountdown, 1000);
     updateCountdown();

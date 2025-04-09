@@ -14,6 +14,7 @@
       height: 100vh;
       margin: 0;
       text-align: center;
+      position: relative;
     }
     div {
       padding: 30px;
@@ -38,6 +39,9 @@
       margin: 10px 0;
       color: #28a745; /* Green color for size change message */
       font-weight: bold;
+      position: absolute;
+      top: 20px;
+      right: 20px;
       display: none;
       opacity: 1;
       transition: opacity 0.5s ease-out;
@@ -71,6 +75,13 @@
 
     .inactive {
       background-color: #ccc; /* Gray when inactive */
+    }
+
+    /* Position the increase/decrease buttons in the bottom-left corner */
+    #increaseBtn, #decreaseBtn {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
     }
   </style>
 </head>
@@ -192,6 +203,17 @@
 
     document.getElementById("decreaseBtn").addEventListener('click', function() {
       adjustFontSize(false);
+    });
+
+    // Event listener for keyboard input (up/down arrow or W/S)
+    window.addEventListener('keydown', function(event) {
+      if (event.key === 'ArrowUp' || event.key === 'w') {
+        adjustFontSize(true);
+      } else if (event.key === 'ArrowDown' || event.key === 's') {
+        adjustFontSize(false);
+      } else if (event.key === ' ' || event.key === 'Enter') {
+        resetFontSize(); // Reset font size when Spacebar or Enter is pressed
+      }
     });
 
     setInterval(updateCountdown, 1000);

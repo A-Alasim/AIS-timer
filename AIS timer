@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School Countdown Timer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+    #session {
+      font-size: 2em;
+      margin: 10px 0;
+    }
+    #countdown {
+      font-size: 1.5em;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>School Countdown Timer</h1>
+  <div id="session">Loading...</div>
+  <div id="countdown">Please wait...</div>
+
+  <script>
+    const schedule = [
+      { name: "Period 1", duration: 40 },
+      { name: "Period 2", duration: 40 },
+      { name: "Period 3", duration: 40 },
+      { name: "Break", duration: 30 },
+      { name: "Period 4", duration: 40 },
+      { name: "Period 5", duration: 40 },
+      { name: "Period 6", duration: 40 },
+      { name: "Period 7", duration: 40 },
+      { name: "Break", duration: 30 },
+      { name: "Period 8", duration: 35 },
+    ];
+
+    const schoolStartTime = new Date();
+    schoolStartTime.setHours(8, 0, 0, 0);
+
+    const sessionTimes = [];
+    let currentTime = new Date(schoolStartTime);
+
+    schedule.forEach((s) => {
+      const start = new Date(currentTime);
+      const end = new Date(currentTime);
+      end.setMinutes(end.getMinutes() + s.duration);
+      sessionTimes.push({ name: s.name, start, end });
+      currentTime = new Date(end);
+    });
+
+    function updateCountdown() {
+      const now = new Date();
+      const session = sessionTimes.find(s => now >= s.start && now < s.end);
+      const sessionEl = document.getElementById("session");
+      const countdownEl = document.getElementById("countdown");
+
+      if (!session) {
+        sessionEl.textContent = "School's Out!";
+        countdownEl.textContent = "Have a great day!";
+        return;
+      }
+
+      const timeLeft = session.end - now;
+
+      const minutes = Math.floor((timeLeft / 1000 / 60) % 60);
+      const seconds = Math.floor((timeLeft / 1000) % 60);
+
+      sessionEl.textContent = session.name;
+      countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} remaining`;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+  </script>
+</body>
+</html>

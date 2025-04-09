@@ -133,10 +133,13 @@
       const session = sessionTimes.find(s => now >= s.start && now < s.end);
       const sessionEl = document.getElementById("session");
       const countdownEl = document.getElementById("countdown");
+      const sizeChangeMessageEl = document.getElementById("sizeChangeMessage");
 
+      // If school is out, hide the countdown and show the end message
       if (!session) {
         sessionEl.textContent = "School's Out!";
         countdownEl.textContent = ""; // Removed "Have a great day!" message
+        sizeChangeMessageEl.style.display = 'none'; // Hide size change message
         return;
       }
 
@@ -213,6 +216,17 @@
         adjustFontSize(false);
       } else if (event.key === ' ' || event.key === 'Enter') {
         resetFontSize(); // Reset font size when Spacebar or Enter is pressed
+      }
+    });
+
+    // Click on the top of the screen to increase font size
+    window.addEventListener('click', function(event) {
+      const screenHeight = window.innerHeight;
+      const clickY = event.clientY;
+
+      // If the click is in the top half of the screen, increase font size
+      if (clickY < screenHeight / 2) {
+        adjustFontSize(true);
       }
     });
 

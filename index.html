@@ -220,13 +220,15 @@
     });
 
     // Click on the top of the screen to increase font size
+    // Click on the bottom of the screen to decrease font size
     window.addEventListener('click', function(event) {
       const screenHeight = window.innerHeight;
       const clickY = event.clientY;
 
-      // If the click is in the top half of the screen, increase font size
       if (clickY < screenHeight / 2) {
-        adjustFontSize(true);
+        adjustFontSize(true); // Increase font size if top half is clicked
+      } else {
+        adjustFontSize(false); // Decrease font size if bottom half is clicked
       }
     });
 

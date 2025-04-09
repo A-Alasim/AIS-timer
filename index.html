@@ -14,17 +14,14 @@
       height: 100vh;
       margin: 0;
       text-align: center;
-      position: relative;
+      flex-direction: column;
     }
     div {
       padding: 30px;
       background-color: #fff;
       border-radius: 15px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      margin-bottom: 20px;
     }
     h1 {
       font-size: 2.5em;
@@ -34,68 +31,49 @@
       font-size: 2em;
       margin: 10px 0;
     }
+    #endMessage {
+      font-size: 2em;
+      margin: 10px 0;
+      color: #FF5733;
+    }
     #sizeChangeMessage {
-      font-size: 1.5em;
-      margin: 10px 0;
-      color: #28a745; /* Green color for size change message */
-      font-weight: bold;
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      display: none;
-      opacity: 1;
-      transition: opacity 0.5s ease-out;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      font-size: 1.2em;
+      color: green;
     }
-
-    /* Button styles */
-    .size-button {
-      padding: 10px 20px;
-      font-size: 1.5em;
-      margin: 10px 0;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border-radius: 5px;
-      border: none;
-      background-color: #28a745;
-      color: white;
-    }
-
-    .size-button:hover {
-      background-color: #218838; /* Darker green on hover */
-    }
-
-    .size-button:active {
-      background-color: #1e7e34; /* Even darker green when pressed */
-    }
-
-    .active {
-      background-color: #007bff; /* Blue when active */
-      box-shadow: 0 0 10px rgba(0, 123, 255, 0.6); /* Light blue glow */
-    }
-
-    .inactive {
-      background-color: #ccc; /* Gray when inactive */
-    }
-
-    /* Position the increase/decrease buttons in the bottom-left corner */
-    #increaseBtn, #decreaseBtn {
-      position: absolute;
+    /* Buttons for size adjustment */
+    #increaseButton, #decreaseButton {
+      position: fixed;
       bottom: 20px;
-      left: 20px;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #decreaseButton {
+      left: 10px;
+    }
+    #increaseButton {
+      right: 10px;
     }
   </style>
 </head>
 <body>
   <div>
     <h1>School Countdown Timer</h1>
-    <div id="sizeChangeMessage"></div> <!-- Message for font size change -->
     <div id="session">Loading...</div>
     <div id="countdown">Please wait...</div>
-
-    <!-- Size buttons -->
-    <button id="increaseBtn" class="size-button">Increase Font Size</button>
-    <button id="decreaseBtn" class="size-button">Decrease Font Size</button>
+    <div id="endMessage"></div>
   </div>
+  <div id="sizeChangeMessage"></div>
+
+  <button id="decreaseButton">Decrease Size</button>
+  <button id="increaseButton">Increase Size</button>
 
   <script>
     const schedule = [
@@ -125,111 +103,99 @@
       currentTime = new Date(end);
     });
 
-    let currentFontSize = 2; // Starting font size multiplier (2em)
-    const originalFontSize = currentFontSize; // Store the original size
+    let currentFontSize = 2;
+    const originalFontSize = currentFontSize;
+
+    const sessionEl = document.getElementById("session");
+    const countdownEl = document.getElementById("countdown");
+    const sizeChangeMessageEl = document.getElementById("sizeChangeMessage");
+    const endMessageEl = document.getElementById("endMessage");
 
     function updateCountdown() {
       const now = new Date();
       const session = sessionTimes.find(s => now >= s.start && now < s.end);
-      const sessionEl = document.getElementById("session");
-      const countdownEl = document.getElementById("countdown");
-      const sizeChangeMessageEl = document.getElementById("sizeChangeMessage");
 
-      // If school is out, hide the countdown and show the end message
       if (!session) {
         sessionEl.textContent = "School's Out!";
-        countdownEl.textContent = ""; // Removed "Have a great day!" message
-        sizeChangeMessageEl.style.display = 'none'; // Hide size change message
+        countdownEl.textContent = "";
+        sizeChangeMessageEl.style.display = 'none';
+        // Optionally, you can set endMessage if needed:
+        // endMessageEl.textContent = "School's Out!";
         return;
       }
 
       const timeLeft = session.end - now;
-
       const minutes = Math.floor((timeLeft / 1000 / 60) % 60);
       const seconds = Math.floor((timeLeft / 1000) % 60);
 
       sessionEl.textContent = session.name;
       countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} remaining`;
+      // Hide size change message after updating countdown
+      sizeChangeMessageEl.style.display = 'none';
     }
 
-    // Handle font size adjustment
     function adjustFontSize(increase) {
-      const sessionEl = document.getElementById("session");
-      const countdownEl = document.getElementById("countdown");
-      const sizeChangeMessageEl = document.getElementById("sizeChangeMessage");
-
-      const increaseBtn = document.getElementById("increaseBtn");
-      const decreaseBtn = document.getElementById("decreaseBtn");
-
       if (increase) {
         currentFontSize += 0.1;
-        sizeChangeMessageEl.textContent = "Font size increased!";
-        sizeChangeMessageEl.style.display = 'block'; // Ensure the message is visible
-        increaseBtn.classList.add("active");
-        decreaseBtn.classList.remove("active");
+        sizeChangeMessageEl.textContent = 'Font size increased!';
       } else {
-        currentFontSize = Math.max(1, currentFontSize - 0.1); // Prevent shrinking too small
-        sizeChangeMessageEl.textContent = "Font size decreased!";
-        sizeChangeMessageEl.style.display = 'block'; // Ensure the message is visible
-        decreaseBtn.classList.add("active");
-        increaseBtn.classList.remove("active");
+        currentFontSize = Math.max(1, currentFontSize - 0.1);
+        sizeChangeMessageEl.textContent = 'Font size decreased!';
       }
 
       sessionEl.style.fontSize = `${currentFontSize}em`;
       countdownEl.style.fontSize = `${currentFontSize}em`;
-
-      // Show the font size change message
-      setTimeout(() => {
-        sizeChangeMessageEl.style.opacity = 0;
-      }, 1000); // Fade out message after 1 second
-
-      setTimeout(() => {
-        sizeChangeMessageEl.style.display = 'none';
-        sizeChangeMessageEl.style.opacity = 1; // Reset opacity for the next message
-      }, 1500); // Hide the message after it fades out
+      endMessageEl.style.fontSize = `${currentFontSize}em`;
+      sizeChangeMessageEl.style.display = 'block';
     }
 
-    // Reset font size to original
     function resetFontSize() {
-      currentFontSize = originalFontSize; // Reset to the original size
-      const sessionEl = document.getElementById("session");
-      const countdownEl = document.getElementById("countdown");
-
+      currentFontSize = originalFontSize;
       sessionEl.style.fontSize = `${currentFontSize}em`;
       countdownEl.style.fontSize = `${currentFontSize}em`;
+      endMessageEl.style.fontSize = `${currentFontSize}em`;
+      sizeChangeMessageEl.style.display = 'none';
     }
 
-    // Event listeners for the buttons
-    document.getElementById("increaseBtn").addEventListener('click', function() {
-      adjustFontSize(true);
-    });
-
-    document.getElementById("decreaseBtn").addEventListener('click', function() {
-      adjustFontSize(false);
-    });
-
-    // Event listener for keyboard input (up/down arrow or W/S)
+    // Keyboard events: arrow keys or w/s to adjust; space/enter to reset.
     window.addEventListener('keydown', function(event) {
       if (event.key === 'ArrowUp' || event.key === 'w') {
         adjustFontSize(true);
       } else if (event.key === 'ArrowDown' || event.key === 's') {
         adjustFontSize(false);
       } else if (event.key === ' ' || event.key === 'Enter') {
-        resetFontSize(); // Reset font size when Spacebar or Enter is pressed
+        resetFontSize();
       }
     });
 
-    // Click on the top of the screen to increase font size
-    // Click on the bottom of the screen to decrease font size
+    // Mouse click events: center resets; top half increases; bottom half decreases.
     window.addEventListener('click', function(event) {
       const screenHeight = window.innerHeight;
+      const screenWidth = window.innerWidth;
+      const clickX = event.clientX;
       const clickY = event.clientY;
 
-      if (clickY < screenHeight / 2) {
-        adjustFontSize(true); // Increase font size if top half is clicked
-      } else {
-        adjustFontSize(false); // Decrease font size if bottom half is clicked
+      // Check if center is clicked (reset)
+      if (clickX > screenWidth / 3 && clickX < 2 * screenWidth / 3 &&
+          clickY > screenHeight / 3 && clickY < 2 * screenHeight / 3) {
+        resetFontSize();
       }
+      // Top half of the screen: increase font size
+      else if (clickY < screenHeight / 2) {
+        adjustFontSize(true);
+      }
+      // Bottom half: decrease font size
+      else {
+        adjustFontSize(false);
+      }
+    });
+
+    // Button click events for increasing and decreasing font size.
+    document.getElementById("increaseButton").addEventListener('click', function() {
+      adjustFontSize(true);
+    });
+    document.getElementById("decreaseButton").addEventListener('click', function() {
+      adjustFontSize(false);
     });
 
     setInterval(updateCountdown, 1000);

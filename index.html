@@ -36,6 +36,7 @@
       margin-bottom: 10px;
       width: 90%;
       max-width: 500px;
+      position: relative;
     }
     h1 {
       font-size: 2em;
@@ -79,6 +80,35 @@
       font-weight: bold;
       color: var(--accent);
     }
+    .hitbox {
+      position: fixed;
+      width: 100px;
+      height: 100px;
+      background-color: rgba(76, 175, 80, 0.1);
+      border: 2px dashed var(--accent);
+      z-index: 999;
+    }
+    #increaseZone {
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    #resetZone {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    #decreaseZone {
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    #sizeMessage {
+      font-size: 0.9em;
+      color: var(--accent);
+      margin-top: 5px;
+      height: 1em;
+    }
   </style>
 </head>
 <body>
@@ -101,7 +131,12 @@
     <div id="scheduleBox">
       <ul id="scheduleList"></ul>
     </div>
+    <div id="sizeMessage"></div>
   </div>
+
+  <div id="increaseZone" class="hitbox"></div>
+  <div id="resetZone" class="hitbox"></div>
+  <div id="decreaseZone" class="hitbox"></div>
 
   <script>
     const subjectsByDay = {
@@ -120,7 +155,43 @@
     const progressBar = document.getElementById("progressBar");
     const scheduleList = document.getElementById("scheduleList");
     const daySelector = document.getElementById("daySelector");
+    const sizeMessage = document.getElementById("sizeMessage");
     let sessionTimes = [];
+    let currentFontSize = 1.5;
+
+    function applyFontSize() {
+      sessionEl.style.fontSize = `${currentFontSize}em`;
+      subjectEl.style.fontSize = `${currentFontSize}em`;
+      countdownEl.style.fontSize = `${currentFontSize}em`;
+      endMessageEl.style.fontSize = `${currentFontSize}em`;
+    }
+
+    function showSizeMessage(text) {
+      sizeMessage.textContent = text;
+      setTimeout(() => sizeMessage.textContent = '', 1500);
+    }
+
+    function adjustFontSize(increase) {
+      currentFontSize = increase ? currentFontSize + 0.1 : Math.max(1, currentFontSize - 0.1);
+      applyFontSize();
+      showSizeMessage(increase ? 'Font size increased!' : 'Font size decreased!');
+    }
+
+    function resetFontSize() {
+      currentFontSize = 1.5;
+      applyFontSize();
+      showSizeMessage('Font size reset.');
+    }
+
+    document.getElementById("increaseZone").addEventListener("click", () => adjustFontSize(true));
+    document.getElementById("decreaseZone").addEventListener("click", () => adjustFontSize(false));
+    document.getElementById("resetZone").addEventListener("click", resetFontSize);
+
+    window.addEventListener('keydown', function(event) {
+      if (event.key === 'ArrowUp' || event.key === 'w') adjustFontSize(true);
+      else if (event.key === 'ArrowDown' || event.key === 's') adjustFontSize(false);
+      else if (event.key === ' ' || event.key === 'Enter') resetFontSize();
+    });
 
     function buildSchedule(day) {
       const subjects = subjectsByDay[day];
@@ -182,25 +253,17 @@
       });
     }
 
-    // Live clock
     setInterval(() => {
       document.getElementById("clock").textContent = new Date().toLocaleTimeString();
     }, 1000);
 
-    // Theme toggle
-    const toggleBtn = document.getElementById("toggleTheme");
-    toggleBtn.addEventListener("click", () => {
+    document.getElementById("toggleTheme").addEventListener("click", () => {
       document.body.classList.toggle("dark");
       localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
     });
-    if (localStorage.getItem("theme") === "dark") {
-      document.body.classList.add("dark");
-    }
+    if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
 
-    // Initialize
-    daySelector.addEventListener("change", () => {
-      buildSchedule(daySelector.value);
-    });
+    daySelector.addEventListener("change", () => buildSchedule(daySelector.value));
     buildSchedule(daySelector.value);
     setInterval(updateCountdown, 1000);
     updateCountdown();

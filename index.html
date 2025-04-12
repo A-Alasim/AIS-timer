@@ -80,28 +80,28 @@
       font-weight: bold;
       color: var(--accent);
     }
-    .hitbox {
+    .float-btn {
       position: fixed;
-      width: 100px;
-      height: 100px;
-      background-color: rgba(76, 175, 80, 0.1);
-      border: 2px dashed var(--accent);
-      z-index: 999;
+      padding: 10px;
+      border-radius: 50%;
+      background-color: var(--accent);
+      color: white;
+      font-size: 1.2em;
+      border: none;
+      cursor: pointer;
+      z-index: 1000;
     }
-    #increaseZone {
+    #increaseBtn {
       top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+      right: 20px;
     }
-    #resetZone {
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-    #decreaseZone {
+    #decreaseBtn {
       bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+      right: 20px;
+    }
+    #resetBtn {
+      bottom: 20px;
+      left: 20px;
     }
     #sizeMessage {
       font-size: 0.9em;
@@ -134,9 +134,9 @@
     <div id="sizeMessage"></div>
   </div>
 
-  <div id="increaseZone" class="hitbox"></div>
-  <div id="resetZone" class="hitbox"></div>
-  <div id="decreaseZone" class="hitbox"></div>
+  <button id="increaseBtn" class="float-btn">A+</button>
+  <button id="decreaseBtn" class="float-btn">A−</button>
+  <button id="resetBtn" class="float-btn">A</button>
 
   <script>
     const subjectsByDay = {
@@ -183,9 +183,9 @@
       showSizeMessage('Font size reset.');
     }
 
-    document.getElementById("increaseZone").addEventListener("click", () => adjustFontSize(true));
-    document.getElementById("decreaseZone").addEventListener("click", () => adjustFontSize(false));
-    document.getElementById("resetZone").addEventListener("click", resetFontSize);
+    document.getElementById("increaseBtn").addEventListener("click", () => adjustFontSize(true));
+    document.getElementById("decreaseBtn").addEventListener("click", () => adjustFontSize(false));
+    document.getElementById("resetBtn").addEventListener("click", resetFontSize);
 
     window.addEventListener('keydown', function(event) {
       if (event.key === 'ArrowUp' || event.key === 'w') adjustFontSize(true);

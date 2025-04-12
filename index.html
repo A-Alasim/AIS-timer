@@ -5,138 +5,142 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>School Countdown Timer</title>
   <style>
+    :root {
+      --bg: #f9f9f9;
+      --text: #000;
+      --card: #fff;
+      --accent: #4CAF50;
+    }
+    body.dark {
+      --bg: #1c1c1c;
+      --text: #f0f0f0;
+      --card: #2c2c2c;
+    }
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #a2c2e7, #f9f9f9);
+      background-color: var(--bg);
+      color: var(--text);
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
       height: 100vh;
       margin: 0;
       text-align: center;
-      flex-direction: column;
     }
     .timerBox {
-      padding: 30px;
-      background-color: #fff;
+      padding: 20px;
+      background-color: var(--card);
       border-radius: 15px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
+      margin-bottom: 10px;
+      width: 90%;
+      max-width: 500px;
     }
     h1 {
-      font-size: 2.5em;
-      margin-bottom: 20px;
-    }
-    #session, #countdown {
       font-size: 2em;
-      margin: 10px 0;
+      margin: 0 0 10px;
     }
-    #session, #countdown {
-      font-size: 2em;
-      margin: 10px 0;
-    }
-    #session, #countdown, #endMessage {
-      font-size: 2em;
-      margin: 10px 0;
-    }
-    #session, #countdown {
-      font-size: 2em;
-    }
-    #endMessage {
-      color: #FF5733;
-    }
-    #sizeChangeMessage {
-      position: fixed;
-      top: 10px;
-      right: 10px;
+    #clock {
       font-size: 1.2em;
-      color: green;
+      margin-bottom: 10px;
     }
-    /* Responsive Buttons */
-    #increaseButton, #decreaseButton {
-      position: fixed;
-      bottom: 20px;
-      padding: 10px 20px;
-      font-size: 1.2em;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
+    #session, #subject, #countdown, #endMessage {
+      font-size: 1.5em;
+      margin: 5px 0;
+    }
+    #progressBarContainer {
+      height: 10px;
+      background-color: #ddd;
       border-radius: 5px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    #progressBar {
+      height: 100%;
+      background-color: var(--accent);
+      width: 0%;
+      transition: width 1s linear;
+    }
+    select, button {
+      margin: 5px;
+      padding: 8px 12px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
       cursor: pointer;
-      z-index: 100;
     }
-    #decreaseButton {
-      left: 10px;
+    #scheduleBox ul {
+      list-style: none;
+      padding: 0;
+      text-align: left;
     }
-    #increaseButton {
-      right: 10px;
-    }
-    @media (max-width: 500px) {
-      #increaseButton, #decreaseButton {
-        width: 40%;
-        left: 5%;
-        right: auto;
-      }
-      #increaseButton {
-        left: auto;
-        right: 5%;
-      }
+    #scheduleBox li.current {
+      font-weight: bold;
+      color: var(--accent);
     }
   </style>
 </head>
 <body>
-  <div class="timerBox" id="timerBox">
+  <div class="timerBox">
     <h1>School Countdown Timer</h1>
-    <div id="session" aria-live="polite">Loading...</div>
-    <div id="countdown" aria-live="polite">Please wait...</div>
+    <div id="clock"></div>
+    <div id="session"></div>
+    <div id="subject"></div>
+    <div id="countdown"></div>
+    <div id="progressBarContainer"><div id="progressBar"></div></div>
     <div id="endMessage"></div>
+    <select id="daySelector">
+      <option value="Sunday">Sunday</option>
+      <option value="Monday">Monday</option>
+      <option value="Tuesday">Tuesday</option>
+      <option value="Wednesday">Wednesday</option>
+      <option value="Thursday">Thursday</option>
+    </select>
+    <button id="toggleTheme">Toggle 🌞/🌙</button>
+    <div id="scheduleBox">
+      <ul id="scheduleList"></ul>
+    </div>
   </div>
-  <div id="sizeChangeMessage"></div>
-
-  <button id="decreaseButton">Decrease Size</button>
-  <button id="increaseButton">Increase Size</button>
 
   <script>
-    const schedule = [
-      { name: "Period 1", duration: 40 },
-      { name: "Period 2", duration: 40 },
-      { name: "Period 3", duration: 40 },
-      { name: "Break", duration: 30 },
-      { name: "Period 4", duration: 40 },
-      { name: "Period 5", duration: 40 },
-      { name: "Period 6", duration: 40 },
-      { name: "Period 7", duration: 40 },
-      { name: "Break", duration: 30 },
-      { name: "Period 8", duration: 35 },
-    ];
+    const subjectsByDay = {
+      Sunday: ["Social Studies", "Physics", "Chemistry", "Break", "Mathematics", "Physics", "Quran", "Mathematics", "Prayer", "English Language"],
+      Monday: ["Chemistry", "Arabic Language", "Biology", "Break", "Mathematics", "Technology", "Physics", "English Language", "Prayer", "Social Studies"],
+      Tuesday: ["Mathematics", "English Language", "Mathematics", "Break", "Islamic Studies", "Physics", "Arabic Language", "English Language", "Prayer", "Chemistry"],
+      Wednesday: ["Biology", "Islamic Studies", "Biology", "Break", "History & Geography of KSA", "Quran", "English Language", "Arabic Language", "Prayer", "Physical Education"],
+      Thursday: ["Chemistry", "English Language", "Mathematics", "Break", "Biology", "Arabic Language", "Technology", "Mathematics", "Prayer", "Physical Education"]
+    };
 
-    const schoolStartTime = new Date();
-    schoolStartTime.setHours(8, 0, 0, 0);
-
-    const sessionTimes = [];
-    let currentTime = new Date(schoolStartTime);
-
-    schedule.forEach((s) => {
-      const start = new Date(currentTime);
-      const end = new Date(currentTime);
-      end.setMinutes(end.getMinutes() + s.duration);
-      sessionTimes.push({ name: s.name, start, end });
-      currentTime = new Date(end);
-    });
-
-    let currentFontSize = 2;
-    const originalFontSize = currentFontSize;
-
+    const scheduleTemplate = [40, 40, 40, 30, 40, 40, 40, 40, 30, 35];
     const sessionEl = document.getElementById("session");
+    const subjectEl = document.getElementById("subject");
     const countdownEl = document.getElementById("countdown");
-    const sizeChangeMessageEl = document.getElementById("sizeChangeMessage");
     const endMessageEl = document.getElementById("endMessage");
-    const timerBoxEl = document.getElementById("timerBox");
+    const progressBar = document.getElementById("progressBar");
+    const scheduleList = document.getElementById("scheduleList");
+    const daySelector = document.getElementById("daySelector");
+    let sessionTimes = [];
 
-    function applyFontSize() {
-      sessionEl.style.fontSize = `${currentFontSize}em`;
-      countdownEl.style.fontSize = `${currentFontSize}em`;
-      endMessageEl.style.fontSize = `${currentFontSize}em`;
+    function buildSchedule(day) {
+      const subjects = subjectsByDay[day];
+      const schedule = [];
+      for (let i = 0; i < scheduleTemplate.length; i++) {
+        schedule.push({ name: subjects[i], duration: scheduleTemplate[i] });
+      }
+
+      const schoolStartTime = new Date();
+      schoolStartTime.setHours(8, 0, 0, 0);
+      sessionTimes = [];
+      let currentTime = new Date(schoolStartTime);
+
+      schedule.forEach((s) => {
+        const start = new Date(currentTime);
+        const end = new Date(currentTime);
+        end.setMinutes(end.getMinutes() + s.duration);
+        sessionTimes.push({ ...s, start, end });
+        currentTime = new Date(end);
+      });
     }
 
     function updateCountdown() {
@@ -144,80 +148,60 @@
       const session = sessionTimes.find(s => now >= s.start && now < s.end);
 
       if (!session) {
-        sessionEl.textContent = "🎉 School's Out!";
-        countdownEl.style.display = "none";
-        sizeChangeMessageEl.style.display = 'none';
+        sessionEl.textContent = "School's Out!";
+        countdownEl.textContent = "";
+        subjectEl.textContent = "";
         endMessageEl.textContent = "Enjoy your free time!";
+        progressBar.style.width = "0%";
+        renderScheduleList();
         return;
       }
 
       const timeLeft = session.end - now;
+      const total = session.end - session.start;
       const minutes = Math.floor((timeLeft / 1000 / 60) % 60);
       const seconds = Math.floor((timeLeft / 1000) % 60);
+      const percent = 100 - (timeLeft / total) * 100;
 
       sessionEl.textContent = session.name;
+      subjectEl.textContent = `Subject: ${session.name}`;
       countdownEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} remaining`;
-      countdownEl.style.display = "block";
       endMessageEl.textContent = "";
-      sizeChangeMessageEl.style.display = 'none';
+      progressBar.style.width = `${percent}%`;
+      renderScheduleList();
     }
 
-    function adjustFontSize(increase) {
-      if (increase) {
-        currentFontSize += 0.1;
-        sizeChangeMessageEl.textContent = 'Font size increased!';
-      } else {
-        currentFontSize = Math.max(1, currentFontSize - 0.1);
-        sizeChangeMessageEl.textContent = 'Font size decreased!';
-      }
-      applyFontSize();
-      sizeChangeMessageEl.style.display = 'block';
+    function renderScheduleList() {
+      const now = new Date();
+      scheduleList.innerHTML = "";
+      sessionTimes.forEach(s => {
+        const li = document.createElement("li");
+        li.textContent = `${s.name}: ${s.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${s.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        if (now >= s.start && now < s.end) li.classList.add("current");
+        scheduleList.appendChild(li);
+      });
     }
 
-    function resetFontSize() {
-      currentFontSize = originalFontSize;
-      applyFontSize();
-      sizeChangeMessageEl.style.display = 'none';
+    // Live clock
+    setInterval(() => {
+      document.getElementById("clock").textContent = new Date().toLocaleTimeString();
+    }, 1000);
+
+    // Theme toggle
+    const toggleBtn = document.getElementById("toggleTheme");
+    toggleBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+    });
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark");
     }
 
-    // Keyboard events
-    window.addEventListener('keydown', function(event) {
-      if (event.key === 'ArrowUp' || event.key === 'w') {
-        adjustFontSize(true);
-      } else if (event.key === 'ArrowDown' || event.key === 's') {
-        adjustFontSize(false);
-      } else if (event.key === ' ' || event.key === 'Enter') {
-        resetFontSize();
-      }
+    // Initialize
+    daySelector.addEventListener("change", () => {
+      buildSchedule(daySelector.value);
     });
-
-    // Mouse click events
-    window.addEventListener('click', function(event) {
-      const screenHeight = window.innerHeight;
-      const screenWidth = window.innerWidth;
-      const clickX = event.clientX;
-      const clickY = event.clientY;
-
-      if (clickX > screenWidth / 3 && clickX < 2 * screenWidth / 3 &&
-          clickY > screenHeight / 3 && clickY < 2 * screenHeight / 3) {
-        resetFontSize();
-      } else if (clickY < screenHeight / 2) {
-        adjustFontSize(true);
-      } else {
-        adjustFontSize(false);
-      }
-    });
-
-    // Button click events (prevent background click conflict)
-    document.getElementById("increaseButton").addEventListener('click', function(event) {
-      event.stopPropagation();
-      adjustFontSize(true);
-    });
-    document.getElementById("decreaseButton").addEventListener('click', function(event) {
-      event.stopPropagation();
-      adjustFontSize(false);
-    });
-
+    buildSchedule(daySelector.value);
     setInterval(updateCountdown, 1000);
     updateCountdown();
   </script>
